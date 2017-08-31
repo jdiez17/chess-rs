@@ -1,0 +1,6 @@
+[package]
+name = "chess-rs"
+version = "0.1.0"
+authors = ["Jose Diez <me@jdiez.me>"]
+
+[dependencies]
