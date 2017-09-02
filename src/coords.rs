@@ -1,5 +1,6 @@
 use std::fmt;
 use std::char;
+use std::convert::TryFrom;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Coords {
@@ -9,10 +10,11 @@ pub struct Coords {
 
 impl Coords {
     pub fn new(s: &str) -> Coords {
-        Coords::parse(s).unwrap()
+        let chars: Vec<char> = s.chars().collect();
+        Coords::try_from(&chars[..]).unwrap()
     }
 
-    pub fn parse_file(file: char) -> Option<usize> {
+    pub fn file_try_from(file: char) -> Option<usize> {
         if file < 'a' || file > 'h' {
             return None;
         }
@@ -20,24 +22,27 @@ impl Coords {
         Some((file as u32 - 'a' as u32) as usize)
     }
 
-    pub fn parse_row(row: char) -> Option<usize> {
-        let row_digit = row.to_digit(10).unwrap();
-        if row_digit < 1 || row_digit > 8 {
+    pub fn rank_try_from(rank: char) -> Option<usize> {
+        let rank_digit = rank.to_digit(10).unwrap();
+        if rank_digit < 1 || rank_digit > 8 {
             return None;
         }
 
-        Some((8 - row_digit) as usize)
+        Some((8 - rank_digit) as usize)
     }
+}
 
-    pub fn parse(s: &str) -> Option<Coords> {
-        let chars: Vec<char> = s.chars().collect();
-        if chars.len() != 2 {
-            return None;
+impl<'a> TryFrom<&'a[char]> for Coords {
+    type Err = String;
+
+    fn try_from(s: &[char]) -> Result<Self, Self::Err> {
+        if s.len() != 2 {
+            return Err(format!("invalid length {}", s.len()));
         }
 
-        match (Coords::parse_file(chars[0]), Coords::parse_row(chars[1])) {
-            (Some(x), Some(y)) => Some(Coords { x: x, y: y }),
-            _ => None
+        match (Coords::file_try_from(s[0]), Coords::rank_try_from(s[1])) {
+            (Some(x), Some(y)) => Ok(Coords { x: x, y: y }),
+            _ => Err("invalid coords str".to_owned())
         }
     }
 }
@@ -45,9 +50,9 @@ impl Coords {
 impl fmt::Display for Coords {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let file = char::from_u32(self.x as u32 + 'a' as u32).unwrap();
-        let row = (self.y + 1).to_string();
+        let rank = (self.y + 1).to_string();
 
-        write!(f, "{}{}", file, row)
+        write!(f, "{}{}", file, rank)
     }
 }
 

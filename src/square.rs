@@ -51,3 +51,25 @@ impl Square {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_square() {
+        match Square::parse('♜') {
+            Some(sq) => {
+                assert_eq!(sq.piece, Piece::Rook);
+                assert_eq!(sq.color, Color::Black);
+            }
+            None => assert!(false)
+        }
+        match Square::parse('♙') {
+            Some(sq) => {
+                assert_eq!(sq.piece, Piece::Pawn);
+                assert_eq!(sq.color, Color::White);
+            }
+            None => assert!(false)
+        }
+    }
+}
