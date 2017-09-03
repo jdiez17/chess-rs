@@ -1,5 +1,6 @@
 #![feature(try_from)]
 
+mod traits;
 mod piece;
 mod square;
 mod board;

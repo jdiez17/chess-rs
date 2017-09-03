@@ -1,6 +1,7 @@
 use std::fmt;
 use std::char;
 use std::convert::TryFrom;
+use std::str::FromStr;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Coords {
@@ -9,11 +10,6 @@ pub struct Coords {
 }
 
 impl Coords {
-    pub fn new(s: &str) -> Coords {
-        let chars: Vec<char> = s.chars().collect();
-        Coords::try_from(&chars[..]).unwrap()
-    }
-
     pub fn file_try_from(file: char) -> Option<usize> {
         if file < 'a' || file > 'h' {
             return None;

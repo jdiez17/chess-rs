@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use traits::NewFromStr;
 
 use piece::Piece;
 use coords::Coords;
@@ -10,21 +11,16 @@ pub enum Op {
     PawnCapture { src_x: usize, dst: Coords },
 }
 
-impl Op {
-    pub fn new(s: &str) -> Op {
-        Op::try_from(&s.chars()).unwrap()
-    }
-}
-
-impl<'a> TryFrom<&'a Iterator<Item=char>> for Op {
+impl<'a> TryFrom<&'a[char]> for Op {
     type Err = String;
 
-    fn try_from(s: &Iterator<Item=char>) -> Result<Self, Self::Err> {
-        let first = match s.nth(0) {
-            Some(c) => c,
-            None => return Err("empty op string".to_owned())
-        };
-        if first.is_lowercase() {
+    fn try_from(s: &'a[char]) -> Result<Self, Self::Err> {
+        let len = s.len();
+        if len == 0 {
+            return Err("empty op string".to_owned());
+        }
+
+        if s[0].is_lowercase() {
             // This is a pawn move, pawn capture or pawn promotion.
             if len != 2 && len != 4 {
                 return Err(format!("invalid op length {} for pawn move or capture",
@@ -82,12 +78,6 @@ mod tests {
 
     #[test]
     fn test_regular_move() {
-        match Op::new("Be4") {
-            Op::Move { piece, dst } => {
-                assert_eq!(piece, Piece::Bishop);
-                assert_eq!(dst, Coords::new("e4"));
-            },
-            _ => assert!(false)
-        }
+        assert_eq!(Op::new("Be4"), Op::Move { piece: Piece::Bishop, dst: Coords::new("e4") });
     }
 }
