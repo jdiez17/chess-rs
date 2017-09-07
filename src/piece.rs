@@ -12,9 +12,9 @@ pub enum Piece {
 }
 
 impl TryFrom<char> for Piece {
-    type Err = ();
+    type Error = ();
 
-    fn try_from(c: char) -> Result<Self, Self::Err> {
+    fn try_from(c: char) -> Result<Self, Self::Error> {
         match c {
             'K' => Ok(Piece::King),
             'Q' => Ok(Piece::Queen),
@@ -31,6 +31,16 @@ pub enum Color {
     Black,
     White,
     None
+}
+
+impl Color {
+    pub fn opposite(self) -> Color {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+            Color::None => unreachable!()
+        }
+    }
 }
 
 #[cfg(test)]

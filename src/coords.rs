@@ -1,7 +1,6 @@
 use std::fmt;
 use std::char;
 use std::convert::TryFrom;
-use std::str::FromStr;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Coords {
@@ -29,16 +28,16 @@ impl Coords {
 }
 
 impl<'a> TryFrom<&'a[char]> for Coords {
-    type Err = String;
+    type Error = String;
 
-    fn try_from(s: &[char]) -> Result<Self, Self::Err> {
+    fn try_from(s: &[char]) -> Result<Self, Self::Error> {
         if s.len() != 2 {
             return Err(format!("invalid length {}", s.len()));
         }
 
         match (Coords::file_try_from(s[0]), Coords::rank_try_from(s[1])) {
             (Some(x), Some(y)) => Ok(Coords { x: x, y: y }),
-            _ => Err("invalid coords str".to_owned())
+            _ => Err("invalid coords str".into())
         }
     }
 }
@@ -46,7 +45,7 @@ impl<'a> TryFrom<&'a[char]> for Coords {
 impl fmt::Display for Coords {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let file = char::from_u32(self.x as u32 + 'a' as u32).unwrap();
-        let rank = (self.y + 1).to_string();
+        let rank = (8 - self.y).to_string();
 
         write!(f, "{}{}", file, rank)
     }

@@ -1,5 +1,4 @@
 use std::convert::TryFrom;
-use traits::NewFromStr;
 
 use piece::Piece;
 use coords::Coords;
@@ -7,17 +6,17 @@ use coords::Coords;
 #[derive(Debug, Eq, PartialEq)]
 pub enum Op {
     Move { piece: Piece, dst: Coords },
-    // TODO: DisambiguatedMove
     PawnCapture { src_x: usize, dst: Coords },
+    DisambiguatedMove, /* TODO */
 }
 
 impl<'a> TryFrom<&'a[char]> for Op {
-    type Err = String;
+    type Error = String;
 
-    fn try_from(s: &'a[char]) -> Result<Self, Self::Err> {
+    fn try_from(s: &'a[char]) -> Result<Self, Self::Error> {
         let len = s.len();
         if len == 0 {
-            return Err("empty op string".to_owned());
+            return Err("empty op string".into());
         }
 
         if s[0].is_lowercase() {
@@ -33,9 +32,9 @@ impl<'a> TryFrom<&'a[char]> for Op {
                     (Some(src_x), Ok(dst)) => {
                         return Ok(Op::PawnCapture { src_x: src_x, dst: dst })
                     },
-                    (Some(_), Err(_)) => return Err("invalid destination".to_owned()),
-                    (None, Ok(_)) => return Err("invalid source file for pawn capture".to_owned()),
-                    _ => return Err("you did everything wrong, congrats".to_owned())
+                    (Some(_), Err(_)) => return Err("invalid destination".into()),
+                    (None, Ok(_)) => return Err("invalid source file for pawn capture".into()),
+                    _ => return Err("you did everything wrong, congrats".into())
                 }
             } else if len == 2 {
                 // This is a pawn move.
@@ -54,16 +53,17 @@ impl<'a> TryFrom<&'a[char]> for Op {
             // TODO: disambiguating moves
             match (Piece::try_from(s[0]), Coords::try_from(&s[1..])) {
                 (Ok(piece), Ok(dst)) => return Ok(Op::Move { piece: piece, dst: dst }),
-                (_, _) => return Err("nope".to_owned())
+                (_, _) => return Err("nope".into())
             }
         }
 
-        return Err("unknown sentence string".to_owned());
+        return Err("unknown sentence string".into());
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use traits::NewFromStr;
     use super::*;
 
     #[test]

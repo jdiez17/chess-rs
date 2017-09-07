@@ -1,9 +1,10 @@
 use std::fmt;
 use std::char;
+use std::convert::TryFrom;
 
 use piece::{Piece, Color};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Square {
     pub piece: Piece,
     pub color: Color
@@ -26,13 +27,15 @@ impl fmt::Display for Square {
     }
 }
 
-impl Square {
-    pub fn parse(c: char) -> Option<Square> { // TODO: is there a trait for this?
+impl TryFrom<char> for Square {
+    type Error = ();
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
         if c == ' ' {
-            return Some(Square { piece: Piece::Empty, color: Color::None });
+            return Ok(Square { piece: Piece::Empty, color: Color::None });
         }
         if c < '♔' || c > '♟' {
-            return None;
+            return Err(());
         }
 
         let color = if c >= '♚' { Color::Black } else { Color::White };
@@ -44,11 +47,12 @@ impl Square {
             '♗' => Piece::Bishop,
             '♘' => Piece::Knight,
             '♙' => Piece::Pawn,
-            _ => unreachable!()
+            _ => return Err(())
         };
 
-        Some(Square { piece: piece, color: color })
+        Ok(Square { piece: piece, color: color })
     }
+
 }
 
 #[cfg(test)]
@@ -57,19 +61,19 @@ mod tests {
 
     #[test]
     fn parse_square() {
-        match Square::parse('♜') {
-            Some(sq) => {
+        match Square::try_from('♜') {
+            Ok(sq) => {
                 assert_eq!(sq.piece, Piece::Rook);
                 assert_eq!(sq.color, Color::Black);
             }
-            None => assert!(false)
+            Err(_) => assert!(false)
         }
-        match Square::parse('♙') {
-            Some(sq) => {
+        match Square::try_from('♙') {
+            Ok(sq) => {
                 assert_eq!(sq.piece, Piece::Pawn);
                 assert_eq!(sq.color, Color::White);
             }
-            None => assert!(false)
+            Err(_) => assert!(false)
         }
     }
 }
